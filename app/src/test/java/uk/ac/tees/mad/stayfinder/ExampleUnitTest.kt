@@ -1,4 +1,4 @@
-package uk.ac.tees.mad.stayhere
+package uk.ac.tees.mad.stayfinder
 
 import org.junit.Test
 

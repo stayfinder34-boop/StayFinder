@@ -2,14 +2,16 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
+    id("com.google.gms.google-services")
 }
 
 android {
-    namespace = "uk.ac.tees.mad.stayhere"
+    namespace = "uk.ac.tees.mad.stayfinder"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "uk.ac.tees.mad.stayhere"
+        applicationId = "uk.ac.tees.mad.stayfinder"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -55,5 +57,29 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+   debugImplementation(libs.androidx.ui.test.manifest)
+
+
+    // navigation
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    //viewmodel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    //splash screen
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
+    //material 3 icon extended
+    implementation("androidx.compose.material:material-icons-extended")
+    //kotlin -serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+
+    //retrofit dependency
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+
+    //firebase
+    implementation(platform("com.google.firebase:firebase-bom:34.9.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+
 }

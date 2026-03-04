@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="uk.ac.tees.mad.stayfinder" />
+                  <option name="mobileSdkAppId" value="1:427146473691:android:fea57ac409e8f800a29cfe" />
+                  <option name="projectId" value="stayfinder-4e664" />
+                  <option name="projectNumber" value="427146473691" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

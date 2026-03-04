@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "427146473691",
+    "project_id": "stayfinder-4e664",
+    "storage_bucket": "stayfinder-4e664.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:427146473691:android:fea57ac409e8f800a29cfe",
+        "android_client_info": {
+          "package_name": "uk.ac.tees.mad.stayfinder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDn_B5vkCAiBrBu3APwnsCwWJuvDI-IQE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
