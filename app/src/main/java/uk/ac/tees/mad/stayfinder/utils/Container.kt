@@ -2,6 +2,11 @@ package uk.ac.tees.mad.stayfinder.utils
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import uk.ac.tees.mad.stayfinder.data.remote.HotelApiService
+import uk.ac.tees.mad.stayfinder.data.repository.AuthRepository
+import uk.ac.tees.mad.stayfinder.data.repository.AuthRepositoryImpl
+import uk.ac.tees.mad.stayfinder.data.repository.HotelRepository
+import uk.ac.tees.mad.stayfinder.data.repository.HotelRepositoryImpl
 
 class Container {
     val firebaseAuth : FirebaseAuth by lazy{
@@ -11,6 +16,22 @@ class Container {
    val fireStore : FirebaseFirestore by lazy {
        FirebaseFirestore.getInstance()
    }
+
+    val apiService : HotelApiService by lazy {
+        RetrofitClient.apiService
+    }
+
+    val authRepository : AuthRepository by lazy {
+        AuthRepositoryImpl(
+            auth = firebaseAuth,
+            store = fireStore
+        )
+    }
+
+    val hotelRepository : HotelRepository by lazy {
+        HotelRepositoryImpl(apiService)
+    }
+
 
 }
 
