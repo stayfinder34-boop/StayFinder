@@ -1,6 +1,7 @@
 package uk.ac.tees.mad.stayfinder.ui.screens.auth
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -85,6 +86,7 @@ class AuthViewModel (application: Application)
                    )
                }
            }.onFailure { error->
+               Log.d("Auth" , "${error.message}")
                _authUiState.update {
                    it.copy(
                        isLoading = false ,
@@ -105,7 +107,7 @@ class AuthViewModel (application: Application)
         }
     }
 
-    private fun signup(){
+    private fun signup() {
         val state = _authUiState.value
         viewModelScope.launch {
             _authUiState.update {
@@ -113,24 +115,25 @@ class AuthViewModel (application: Application)
                     isLoading = true
                 )
             }
-            authRepository.registerUser(email = state.email ,
-                password = state.password)
+            authRepository.registerUser(
+                email = state.email,
+                password = state.password
+            )
                 .onSuccess {
                     _authUiState.update {
                         it.copy(
-                            isLoading = false ,
-                            navigateToHome =  true
+                            isLoading = false,
+                            navigateToHome = true
                         )
                     }
-                }.onFailure {error->
+                }.onFailure { error ->
                     _authUiState.update {
                         it.copy(
-                            isLoading = false ,
+                            isLoading = false,
                             error = error.message
                         )
                     }
                 }
         }
     }
-
 }

@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import uk.ac.tees.mad.stayfinder.ui.screens.auth.AuthScreen
+import uk.ac.tees.mad.stayfinder.ui.screens.home.HomeScreen
 
 /**
  * App Navigation Host is basically a holder to navigation it will contain all the screens
@@ -37,7 +38,9 @@ fun AppNavHost(startDestination: NavRoutes ,
 
         composable(
             NavRoutes.Home.route
-        ){}
+        ){
+            HomeScreen()
+        }
 
         composable(
             NavRoutes.Setting.route

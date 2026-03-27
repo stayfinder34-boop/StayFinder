@@ -10,7 +10,7 @@ data class AuthUiState(
     val confirmPassword :String = "",
     val navigateToHome : Boolean = false,
     val error: String ? = null,
-    val selectedMode : AuthMode = AuthMode.SIGNUP
+    val selectedMode : AuthMode = AuthMode.LOGIN
 ){
     val canSubmit : Boolean
         get() = when(selectedMode){

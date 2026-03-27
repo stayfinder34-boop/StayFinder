@@ -1,22 +1,36 @@
 package uk.ac.tees.mad.stayfinder.utils
 
-import uk.ac.tees.mad.stayfinder.data.model.HotelDomain
+import uk.ac.tees.mad.stayfinder.data.model.Destination
+import uk.ac.tees.mad.stayfinder.data.model.DestinationDto
+import uk.ac.tees.mad.stayfinder.data.model.Hotel
 import uk.ac.tees.mad.stayfinder.data.model.HotelDto
 
-fun HotelDto.toDomainHotel() : HotelDomain{
-    return HotelDomain(
+fun HotelDto.toDomain(): Hotel {
+    return Hotel(
         id = hotelId,
-        name = hotelName,
-        rating = reviewScore,
-        ratingText = reviewScoreWord,
-        city = city,
-        imageUrl = mainPhotoUrl,
-        price = minTotalPrice,
-        currency = currencyCode,
-        latitude = latitude,
-        longitude = longitude
+        name = property.name,
+        rating = property.reviewScore,
+        ratingText = property.reviewScoreWord,
+        imageUrl = property.photoUrls?.firstOrNull(),
+        price = property.priceBreakdown?.grossPrice?.value,
+        currency = property.priceBreakdown?.grossPrice?.currency,
+        latitude = property.latitude,
+        longitude = property.longitude
     )
 }
+
+fun DestinationDto.toDomain(): Destination {
+    return Destination(
+        id = destId,
+        searchType = searchType,
+        name = name,
+        label = label,
+        type = destType
+    )
+}
+
+
+
 
 
 /**

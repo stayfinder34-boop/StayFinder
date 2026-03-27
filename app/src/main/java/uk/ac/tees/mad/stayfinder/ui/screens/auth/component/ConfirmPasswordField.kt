@@ -36,7 +36,7 @@ fun ConfirmPasswordField(
             modifier = Modifier.fillMaxWidth(),
             placeholder = {
                 Text(
-                    text = "........"
+                    text = "11111111"
                 )
             },
             leadingIcon = {

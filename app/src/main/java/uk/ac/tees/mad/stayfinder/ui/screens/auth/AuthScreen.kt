@@ -1,6 +1,7 @@
 package uk.ac.tees.mad.stayfinder.ui.screens.auth
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +12,9 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -94,6 +97,7 @@ fun AuthScreenContent(uiState: AuthUiState ,
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = Dimens.ScreenPadding)
+                .verticalScroll(rememberScrollState())
         ) {
             EmailField(
                 email = uiState.email,

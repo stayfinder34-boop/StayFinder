@@ -2,17 +2,23 @@ package uk.ac.tees.mad.stayfinder.data.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+
 @Serializable
 data class HotelSearchResponse(
+
+    @SerialName("status")
     val status: Boolean,
+
+    @SerialName("data")
     val data: HotelData
 )
 
 @Serializable
 data class HotelData(
-    val result: List<HotelDto>
-)
 
+    @SerialName("hotels")
+    val hotels: List<HotelDto>
+)
 
 @Serializable
 data class HotelDto(
@@ -20,26 +26,50 @@ data class HotelDto(
     @SerialName("hotel_id")
     val hotelId: Long,
 
-    @SerialName("hotel_name")
-    val hotelName: String,
+    @SerialName("property")
+    val property: PropertyDto
+)
 
-    @SerialName("review_score")
+@Serializable
+data class PropertyDto(
+
+    @SerialName("name")
+    val name: String,
+
+    @SerialName("reviewScore")
     val reviewScore: Double? = null,
 
-    @SerialName("review_score_word")
+    @SerialName("reviewScoreWord")
     val reviewScoreWord: String? = null,
 
-    val city: String,
-
-    @SerialName("main_photo_url")
-    val mainPhotoUrl: String? = null,
-
-    @SerialName("min_total_price")
-    val minTotalPrice: Double? = null,
-
-    @SerialName("currencycode")
-    val currencyCode: String? = null,
-
+    @SerialName("latitude")
     val latitude: Double,
-    val longitude: Double
+
+    @SerialName("longitude")
+    val longitude: Double,
+
+    @SerialName("photoUrls")
+    val photoUrls: List<String>? = null,
+
+    @SerialName("priceBreakdown")
+    val priceBreakdown: PriceBreakdownDto? = null
+)
+
+
+@Serializable
+data class PriceBreakdownDto(
+
+    @SerialName("grossPrice")
+    val grossPrice: GrossPriceDto? = null
+)
+
+
+@Serializable
+data class GrossPriceDto(
+
+    @SerialName("value")
+    val value: Double,
+
+    @SerialName("currency")
+    val currency: String
 )
