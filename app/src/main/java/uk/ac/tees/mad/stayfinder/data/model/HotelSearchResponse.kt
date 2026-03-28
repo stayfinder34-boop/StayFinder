@@ -42,6 +42,9 @@ data class PropertyDto(
     @SerialName("reviewScoreWord")
     val reviewScoreWord: String? = null,
 
+    @SerialName("wishList")
+    val location :String  ,
+
     @SerialName("latitude")
     val latitude: Double,
 

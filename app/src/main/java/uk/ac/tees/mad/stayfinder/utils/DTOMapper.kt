@@ -15,7 +15,8 @@ fun HotelDto.toDomain(): Hotel {
         price = property.priceBreakdown?.grossPrice?.value,
         currency = property.priceBreakdown?.grossPrice?.currency,
         latitude = property.latitude,
-        longitude = property.longitude
+        longitude = property.longitude ,
+        location = property.location
     )
 }
 
