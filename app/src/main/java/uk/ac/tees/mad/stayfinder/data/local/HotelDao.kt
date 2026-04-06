@@ -13,11 +13,11 @@ interface HotelDao {
     suspend fun insertHotels(hotels: List<HotelEntity>)
 
     @Query("SELECT * FROM hotel_table WHERE id = :id")
-     fun getHotelById(id: Long): Flow<HotelEntity?>
+     fun getHotelById(id: Long): HotelEntity?
 
      @Query("SELECT * FROM hotel_table")
      fun getAllHotels(): Flow<List<HotelEntity>>
 
-     @Query("DELETE FROM hotel_table")
-     suspend fun deleteAllHotels()
+     @Query("DELETE FROM hotel_table where destId != :id")
+     suspend fun deleteAllHotels(id : String)
 }

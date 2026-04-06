@@ -34,6 +34,9 @@ class HomeViewModel (application: Application)
      * init is working as engine starter
      */
 
+    init {
+            fetchFromRoom()
+    }
 
     init {
         Log.d("HomeViewModel" , "init")
@@ -117,5 +120,23 @@ class HomeViewModel (application: Application)
                    }
                }
            )
+    }
+
+    private fun fetchFromRoom() {
+        _homeUiState.update {
+            it.copy(isLoading = true)
+        }
+        viewModelScope.launch {
+            hotelRepository
+                .fetchHotelList()
+                .collect { list ->
+                    _homeUiState.update {
+                        it.copy(
+                            isLoading = false,
+                            hotelList = list
+                        )
+                    }
+                }
+        }
     }
 }

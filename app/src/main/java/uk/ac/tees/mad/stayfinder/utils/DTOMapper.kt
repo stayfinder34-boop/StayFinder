@@ -1,22 +1,24 @@
 package uk.ac.tees.mad.stayfinder.utils
 
+import uk.ac.tees.mad.stayfinder.data.local.HotelEntity
 import uk.ac.tees.mad.stayfinder.data.model.Destination
 import uk.ac.tees.mad.stayfinder.data.model.DestinationDto
 import uk.ac.tees.mad.stayfinder.data.model.Hotel
 import uk.ac.tees.mad.stayfinder.data.model.HotelDto
 
-fun HotelDto.toDomain(): Hotel {
-    return Hotel(
+fun HotelDto.toHotelEntity(destId : String): HotelEntity {
+    return HotelEntity(
         id = hotelId,
+        destId = destId,
         name = property.name,
-        rating = property.reviewScore,
+        rating =property.reviewScore,
+        location = property.location,
         ratingText = property.reviewScoreWord,
         imageUrl = property.photoUrls?.firstOrNull(),
-        price = property.priceBreakdown?.grossPrice?.value,
-        currency = property.priceBreakdown?.grossPrice?.currency,
+        price = property.priceBreakdown?.grossPrice?.value ?:0.0,
+        currency = property.priceBreakdown?.grossPrice?.currency ?:"USD",
         latitude = property.latitude,
-        longitude = property.longitude ,
-        location = property.location
+        longitude = property.longitude,
     )
 }
 
@@ -27,6 +29,21 @@ fun DestinationDto.toDomain(): Destination {
         name = name,
         label = label,
         type = destType
+    )
+}
+
+fun HotelEntity.toDomain(): Hotel {
+    return Hotel(
+        id = id,
+        name = name,
+        rating = rating,
+        location = location,
+        ratingText = ratingText,
+        imageUrl = imageUrl,
+        price = price,
+        currency = currency,
+        latitude = latitude,
+        longitude = longitude
     )
 }
 

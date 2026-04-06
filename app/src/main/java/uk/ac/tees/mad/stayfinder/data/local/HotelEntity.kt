@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class HotelEntity(
     @PrimaryKey
     val id : Long ,
+    val destId : String,
     val name: String,
     val rating: Double?,
     val location : String ,
