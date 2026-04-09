@@ -1,7 +1,9 @@
 package uk.ac.tees.mad.stayfinder.ui.screens.home
 
 import android.app.Application
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.FlowPreview
@@ -18,6 +20,9 @@ import uk.ac.tees.mad.stayfinder.StayFinderApp
 import uk.ac.tees.mad.stayfinder.data.model.Destination
 import uk.ac.tees.mad.stayfinder.data.repository.AuthRepository
 import uk.ac.tees.mad.stayfinder.data.repository.HotelRepository
+import uk.ac.tees.mad.stayfinder.location.LocationProvider
+import uk.ac.tees.mad.stayfinder.notification.SearchReminderWorker
+import uk.ac.tees.mad.stayfinder.utils.DateProvider
 
 class HomeViewModel (application: Application)
     : AndroidViewModel(application){
@@ -30,6 +35,12 @@ class HomeViewModel (application: Application)
 
     private val authRepository : AuthRepository =
         (application as StayFinderApp).container.authRepository
+
+    private val locationProvider : LocationProvider =
+        (application as StayFinderApp).container.locationProvider
+
+    private val dateProvider : DateProvider =
+        (application as StayFinderApp).container.dateProvider
 
         private  val _homeUiState = MutableStateFlow(HomeUiState())
     val homeUiState = _homeUiState.asStateFlow()
@@ -45,7 +56,6 @@ class HomeViewModel (application: Application)
      */
 
     init {
-        Log.d("HomeViewModel" , "init for room")
             fetchFromRoom()
         observeQueryChange()
     }
@@ -101,20 +111,56 @@ class HomeViewModel (application: Application)
      * from server and update the hotel list into the database then we will read from data base
      */
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun onSearch(){
-        Log.d("HomeViewModel" ,"search called")
         viewModelScope.launch {
-            hotelRepository.searchHotelList(
+            _homeUiState.update {
+                it.copy(
+                    isSearchLoading = true
+                )
+            }
+            hotelRepository
+                .searchHotelList(
                 destinationId = _homeUiState.value.selectedDestination.id,
-                arrivalDate  = "2026-02-26",
-                departureDate = "2026-02-28"
+                arrivalDate  = dateProvider.getCurrentDate(),
+                departureDate = dateProvider.getAfterDays(3)
             )
                 .onFailure {error->
                     Log.d("HomeViewModel" , "${error.message}")
                 }
                 .onSuccess {
-                    Log.d("HomeViewModel" , "success")
+                    _homeUiState.update {
+                        it.copy(
+                            shouldRequestNotification = true,
+                        )
+                    }
                 }
+            _homeUiState.update {
+                it.copy(
+                    isSearchLoading = false
+                )
+            }
+        }
+    }
+
+
+    fun resetNotificationFlag(){
+        _homeUiState.update {
+            it.copy(
+                shouldRequestNotification = false
+            )
+        }
+    }
+
+
+    fun scheduleReminder() {
+        hotelRepository
+            .scheduleReminder(_homeUiState.value.selectedDestination.name)
+        _homeUiState.update {
+            it.copy(
+                query = "" ,
+                selectedDestination = Destination(),
+            )
         }
     }
 
@@ -124,6 +170,13 @@ class HomeViewModel (application: Application)
      * 2. debounce time completed then it will automatically calls the getDestinations from repository
      **/
 
+    fun onLocationCLick(isExpanded : Boolean){
+        _homeUiState.update {
+            it.copy(
+                isLocationCardExtended = isExpanded
+            )
+        }
+    }
     @OptIn(FlowPreview::class)
     private fun observeQueryChange(){
         Log.d("HomeViewModel" , "observing")
@@ -176,6 +229,58 @@ class HomeViewModel (application: Application)
                         )
                     }
                 }
+        }
+    }
+
+    fun onActiveChange(isActive: Boolean) {
+
+        _homeUiState.update {
+            it.copy(isSearchBarActive = isActive)
+        }
+
+        if (isActive && _homeUiState.value.query.isBlank()) {
+            _homeUiState.update {
+                it.copy(shouldRequestLocation = true)
+            }
+        }
+    }
+
+    fun onLocationPermissionResult(granted: Boolean ,
+                                   isLocationClick: Boolean = false) {
+
+        if (!granted) {
+            _homeUiState.update {
+                it.copy(shouldRequestLocation = false)
+            }
+            return
+        }
+
+        fetchCurrentLocation(isLocationClick)
+    }
+
+    private fun fetchCurrentLocation(isLocationClick: Boolean) {
+
+        viewModelScope.launch {
+
+            val city = locationProvider.getLocation()
+
+            city?.let { city ->
+
+                _homeUiState.update { state ->
+                    state.copy(
+                        currentLocation =  city,
+                        query = if(isLocationClick) {
+                            state.query
+                        }else{
+                            city
+                        },
+                        shouldRequestLocation = false
+                    )
+                }
+                if(!isLocationClick){
+                    queryFlow.value = city
+                }
+            }
         }
     }
 }
