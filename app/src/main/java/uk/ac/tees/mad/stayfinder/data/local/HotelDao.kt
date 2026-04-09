@@ -13,9 +13,9 @@ interface HotelDao {
     suspend fun insertHotels(hotels: List<HotelEntity>)
 
     @Query("SELECT * FROM hotel_table WHERE id = :id")
-     fun getHotelById(id: Long): HotelEntity?
+     fun getHotelById(id: Long): Flow<HotelEntity ?>
 
-     @Query("SELECT * FROM hotel_table")
+     @Query(" SELECT * FROM hotel_table ORDER BY createdAt DESC")
      fun getAllHotels(): Flow<List<HotelEntity>>
 
      @Query("DELETE FROM hotel_table where destId != :id")

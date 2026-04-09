@@ -17,7 +17,7 @@ class StayFinderApp : Application(){
 
     override fun onCreate() {
         super.onCreate()
-        container = Container()
+        container = Container(applicationContext)
     }
 }
 

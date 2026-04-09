@@ -57,7 +57,7 @@ fun HomeTopBar(
             onClick = onLocationClick ,
             colors = IconButtonDefaults
                 .iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
         ){
             Icon(
@@ -70,7 +70,7 @@ fun HomeTopBar(
             onClick = onLogoutClick ,
             colors = IconButtonDefaults
                 .iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
         ) {
             Icon(

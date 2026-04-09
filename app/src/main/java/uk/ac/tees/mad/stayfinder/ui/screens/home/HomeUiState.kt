@@ -7,6 +7,7 @@ data class HomeUiState(
     val isLoading : Boolean = false,
     val error :String? = null,
     val query: String = "",
+    val navigateToAuth : Boolean = false,
     val selectedDestination : Destination = Destination(),
     val destinationList : List<Destination> = emptyList(),
     val hotelList : List<Hotel> = emptyList()

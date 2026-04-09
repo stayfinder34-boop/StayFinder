@@ -7,7 +7,7 @@ data class Hotel(
     val rating: Double?,
     val location : String ,
     val ratingText: String?,
-    val imageUrl: String?,
+    val imageUrl: List<String> ?,
     val price: Double?,
     val currency: String?,
     val latitude: Double,

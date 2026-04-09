@@ -1,5 +1,7 @@
 package uk.ac.tees.mad.stayfinder.data.repository
 
+import android.util.Log
+import androidx.compose.foundation.isSystemInDarkTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import uk.ac.tees.mad.stayfinder.data.local.HotelDao
@@ -52,13 +54,16 @@ class HotelRepositoryImpl(private val apiService: HotelApiService ,
     override suspend fun searchDestinations(
         query: String
     ): Result<List<Destination>> {
-
         return try {
+
             val response = apiService.searchDestination(query)
 
-            if (!response.status) {
-                return Result.failure(Exception("Destination search failed"))
+            if (response.status != true || response.data == null) {
+                return Result.failure(
+                    Exception(response.message ?: "Destination search failed")
+                )
             }
+
             val cityDestinations = response.data
                 .filter { it.destType == "city" }
                 .map { it.toDomain() }
@@ -78,13 +83,11 @@ class HotelRepositoryImpl(private val apiService: HotelApiService ,
             }
     }
 
-    override fun getHotelById(id : Long): HotelEntity? {
-        return dao.getHotelById(
-            id = id
-        )
+    override fun getHotelById(id : Long): Flow<Hotel> {
+        val response = dao.getHotelById(id)
+        Log.d("TAG", "getHotelById: $response")
+        return  response.map { it?.toDomain() ?: throw Exception("Hotel not found") }
     }
-
-
 }
 
 
@@ -98,4 +101,8 @@ class HotelRepositoryImpl(private val apiService: HotelApiService ,
 /**
  * fetch hotel list will return the list of hotel which is cached inside the room
  * and viewmodel will keep on collecting the updates from database
+ */
+
+/**
+ * we are caching the latest available data and removing the older data from the database
  */

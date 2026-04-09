@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uk.ac.tees.mad.stayfinder.PreferenceManager
 import uk.ac.tees.mad.stayfinder.StayFinderApp
 import uk.ac.tees.mad.stayfinder.data.repository.AuthRepository
 import uk.ac.tees.mad.stayfinder.utils.AuthMode
@@ -17,6 +18,9 @@ class AuthViewModel (application: Application)
 
         private val authRepository: AuthRepository =
             (application as StayFinderApp).container.authRepository
+
+    private val preferenceManager : PreferenceManager =
+        (application as StayFinderApp).container.preferency
 
         private val _authUiState = MutableStateFlow(AuthUiState())
     val authUiState = _authUiState.asStateFlow()
@@ -78,6 +82,7 @@ class AuthViewModel (application: Application)
                state.email ,
                state.password
            ).onSuccess {
+               preferenceManager.setLoggedIn(true)
                _authUiState.update {
                    it.copy(
                        isLoading = false,
@@ -120,6 +125,7 @@ class AuthViewModel (application: Application)
                 password = state.password
             )
                 .onSuccess {
+                    preferenceManager.setLoggedIn(true)
                     _authUiState.update {
                         it.copy(
                             isLoading = false,

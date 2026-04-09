@@ -2,9 +2,12 @@ package uk.ac.tees.mad.stayfinder.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import uk.ac.tees.mad.stayfinder.ui.screens.auth.AuthScreen
+import uk.ac.tees.mad.stayfinder.ui.screens.detail.DetailScreen
 import uk.ac.tees.mad.stayfinder.ui.screens.home.HomeScreen
 
 /**
@@ -39,7 +42,18 @@ fun AppNavHost(startDestination: NavRoutes ,
         composable(
             NavRoutes.Home.route
         ){
-            HomeScreen()
+            HomeScreen(
+                onLogout = {
+                    navController.navigate(NavRoutes.Auth.route) {
+                        popUpTo(NavRoutes.Home.route) {
+                            inclusive = true
+                        }
+                    }
+                },
+                onDetailClick = {
+                    navController.navigate(NavRoutes.Detail.getDetailRoute(it))
+                }
+            )
         }
 
         composable(
@@ -47,8 +61,21 @@ fun AppNavHost(startDestination: NavRoutes ,
         ){}
 
         composable(
-            NavRoutes.Detail.route
-        ){}
+            NavRoutes.Detail.route ,
+            arguments = listOf(
+                navArgument("id") {
+                    type = NavType.LongType
+                }
+            )
+        ){ backStackEntry ->
+            val hotelId = backStackEntry.arguments?.getLong("id") ?: 0L
+            DetailScreen(
+                id = hotelId,
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
     }
 }
 

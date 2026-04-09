@@ -18,5 +18,5 @@ interface HotelRepository {
 
     suspend fun fetchHotelList(): Flow<List<Hotel>>
 
-    fun getHotelById( id : Long) : HotelEntity?
+    fun getHotelById( id : Long) : Flow<Hotel>
 }

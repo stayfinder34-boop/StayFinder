@@ -1,10 +1,14 @@
 package uk.ac.tees.mad.stayfinder.ui.screens.home.components
 
+import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -32,32 +36,39 @@ import uk.ac.tees.mad.stayfinder.ui.theme.Dimens
 
 @Composable
 fun HotelCard(modifier: Modifier = Modifier,
-              hotel: Hotel){
-
+              hotel: Hotel ,
+              onDetailClick : (Long) -> Unit){
     Card(
         modifier = modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable{
+                onDetailClick(hotel.id)
+            },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp
         )
     ) {
         Column(modifier = Modifier
-            .fillMaxWidth()){
-
+            .fillMaxWidth()
+        ){
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(200.dp)
             ){
                 AsyncImage(
-                    model = hotel.imageUrl ,
+                    model = hotel.imageUrl?.get(0),
                     contentDescription = "hotel image" ,
-                    contentScale = ContentScale.Fit
+                    contentScale = ContentScale.Crop ,
+                    modifier = Modifier.fillMaxSize()
                 )
 
-
                 Surface(
-                    shape = RoundedCornerShape(50),
+                    shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.surface,
                     shadowElevation = 4.dp,
                     modifier = Modifier
@@ -65,7 +76,7 @@ fun HotelCard(modifier: Modifier = Modifier,
                         .padding(12.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -82,6 +93,8 @@ fun HotelCard(modifier: Modifier = Modifier,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold
                         )
+
+                        Spacer(modifier = Modifier.width(4.dp))
                     }
                 }
             }

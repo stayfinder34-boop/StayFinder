@@ -1,14 +1,18 @@
 package uk.ac.tees.mad.stayfinder.utils
 
+import android.content.Context
+import androidx.room.Room
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import uk.ac.tees.mad.stayfinder.PreferenceManager
+import uk.ac.tees.mad.stayfinder.data.local.HotelDataBase
 import uk.ac.tees.mad.stayfinder.data.remote.HotelApiService
 import uk.ac.tees.mad.stayfinder.data.repository.AuthRepository
 import uk.ac.tees.mad.stayfinder.data.repository.AuthRepositoryImpl
 import uk.ac.tees.mad.stayfinder.data.repository.HotelRepository
 import uk.ac.tees.mad.stayfinder.data.repository.HotelRepositoryImpl
 
-class Container {
+class Container(context : Context) {
     val firebaseAuth : FirebaseAuth by lazy{
         FirebaseAuth.getInstance()
     }
@@ -28,11 +32,26 @@ class Container {
         )
     }
 
-    val hotelRepository : HotelRepository by lazy {
-        HotelRepositoryImpl(apiService)
+    private val database: HotelDataBase by lazy {
+        Room.databaseBuilder(
+            context.applicationContext,
+            HotelDataBase::class.java,
+            "hotel_database"
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
+    val hotelRepository : HotelRepository by lazy {
+        HotelRepositoryImpl(
+            apiService = apiService,
+            dao = database.hotelDao()
+        )
+    }
 
+    val preferency by lazy {
+        PreferenceManager(context)
+    }
 }
 
 /**

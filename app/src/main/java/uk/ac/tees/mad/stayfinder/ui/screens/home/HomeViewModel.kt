@@ -7,13 +7,16 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uk.ac.tees.mad.stayfinder.PreferenceManager
 import uk.ac.tees.mad.stayfinder.StayFinderApp
 import uk.ac.tees.mad.stayfinder.data.model.Destination
+import uk.ac.tees.mad.stayfinder.data.repository.AuthRepository
 import uk.ac.tees.mad.stayfinder.data.repository.HotelRepository
 
 class HomeViewModel (application: Application)
@@ -21,6 +24,13 @@ class HomeViewModel (application: Application)
 
         private val hotelRepository : HotelRepository =
             (application as StayFinderApp).container.hotelRepository
+
+    private val preferenceManager : PreferenceManager =
+        (application as StayFinderApp).container.preferency
+
+    private val authRepository : AuthRepository =
+        (application as StayFinderApp).container.authRepository
+
         private  val _homeUiState = MutableStateFlow(HomeUiState())
     val homeUiState = _homeUiState.asStateFlow()
 
@@ -35,14 +45,30 @@ class HomeViewModel (application: Application)
      */
 
     init {
+        Log.d("HomeViewModel" , "init for room")
             fetchFromRoom()
-    }
-
-    init {
-        Log.d("HomeViewModel" , "init")
         observeQueryChange()
     }
 
+    fun onLogoutClick(){
+        authRepository
+            .logout()
+            .onFailure {
+                _homeUiState.update {
+                    it.copy(
+                        error = it.error
+                    )
+                }
+            }
+            .onSuccess {
+                preferenceManager.setLoggedIn(false)
+                _homeUiState.update {
+                    it.copy(
+                        navigateToAuth = true
+                    )
+                }
+            }
+    }
 
     /**
      * onQueryChange will be responsible for keeping the changing text in the search bar
@@ -76,11 +102,21 @@ class HomeViewModel (application: Application)
      */
 
     fun onSearch(){
+        Log.d("HomeViewModel" ,"search called")
         viewModelScope.launch {
-
+            hotelRepository.searchHotelList(
+                destinationId = _homeUiState.value.selectedDestination.id,
+                arrivalDate  = "2026-02-26",
+                departureDate = "2026-02-28"
+            )
+                .onFailure {error->
+                    Log.d("HomeViewModel" , "${error.message}")
+                }
+                .onSuccess {
+                    Log.d("HomeViewModel" , "success")
+                }
         }
     }
-
 
     /**
      * observeQueryChange() this is a private function will keep on observing the query the moment it meets criteria
@@ -90,12 +126,14 @@ class HomeViewModel (application: Application)
 
     @OptIn(FlowPreview::class)
     private fun observeQueryChange(){
+        Log.d("HomeViewModel" , "observing")
         viewModelScope.launch {
             queryFlow
                 .debounce (500)
                 .filter { it.length >=3 }
                 .distinctUntilChanged()
-                .collect { query->
+                .collectLatest { query->
+                    Log.d("HomeViewModel" , query)
                     fetchDestination(query)
                 }
         }
@@ -106,6 +144,7 @@ class HomeViewModel (application: Application)
            .searchDestinations(query)
            .fold(
                onSuccess = {destinations ->
+                   Log.d("HomeViewModel" , "$destinations")
                    _homeUiState.update {
                        it.copy(
                            destinationList = destinations

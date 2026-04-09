@@ -13,6 +13,8 @@ package uk.ac.tees.mad.stayfinder.navigation
 sealed class  NavRoutes(val route : String){
     object Home : NavRoutes("home")
     object Auth : NavRoutes("auth")
-    object Detail : NavRoutes("detail")
+    object Detail : NavRoutes("detail/{id}"){
+        fun getDetailRoute(id : Long) : String = "detail/$id"
+    }
     object Setting : NavRoutes("setting")
 }

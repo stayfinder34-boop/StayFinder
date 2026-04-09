@@ -8,10 +8,13 @@ import kotlinx.serialization.Serializable
 data class DestinationResponse(
 
     @SerialName("status")
-    val status: Boolean,
+    val status: Boolean ? = null,
 
     @SerialName("data")
-    val data: List<DestinationDto>
+    val data: List<DestinationDto> ? = null,
+
+    @SerialName("message")
+    val message: String? = null
 )
 
 @Serializable

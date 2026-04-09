@@ -5,13 +5,13 @@ import androidx.lifecycle.AndroidViewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import uk.ac.tees.mad.stayfinder.PreferenceManager
 import uk.ac.tees.mad.stayfinder.StayFinderApp
 
 class SplashViewModel(application : Application)
     : AndroidViewModel(application) {
-        private val firebaseAuth : FirebaseAuth =
-            (application as StayFinderApp).container.firebaseAuth
-
+      private val preferenceManager : PreferenceManager =
+          (application as StayFinderApp).container.preferency
         private val _splashUiState = MutableStateFlow<SplashUiState>(SplashUiState.Loading)
     val splashUiState = _splashUiState.asStateFlow()
 
@@ -22,10 +22,10 @@ class SplashViewModel(application : Application)
 
     private fun resolveSplash(){
         when{
-            firebaseAuth.currentUser != null -> {
+            preferenceManager.isLoggedIn() ->{
                 _splashUiState.value = SplashUiState.NavigateToHome
             }
-            else -> {
+            else ->{
                 _splashUiState.value = SplashUiState.NavigateToAuth
             }
         }

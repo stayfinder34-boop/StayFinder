@@ -15,7 +15,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -59,6 +61,9 @@ fun SearchBar(
                 Text(text = "Search")
             }
         },
+        colors = SearchBarDefaults.colors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
         leadingIcon = {
             Icon(Icons.Default.Search,
                 contentDescription = "search")
@@ -69,7 +74,9 @@ fun SearchBar(
                 .fillMaxWidth() ,
             verticalArrangement = Arrangement.spacedBy(Dimens.SpacerSmall)
         ){
-            items(destinations){ destination->
+            items(destinations ,
+                key = { destination -> destination.id }
+            ){ destination->
                 DestinationItem(destination = destination ,
                     onDestClick = onDestClick)
             }

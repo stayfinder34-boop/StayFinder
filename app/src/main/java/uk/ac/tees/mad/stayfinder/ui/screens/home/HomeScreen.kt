@@ -1,5 +1,6 @@
 package uk.ac.tees.mad.stayfinder.ui.screens.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,9 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -26,14 +31,28 @@ import uk.ac.tees.mad.stayfinder.ui.theme.Dimens
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = viewModel()
+    viewModel: HomeViewModel = viewModel() ,
+    onLogout:()-> Unit ,
+    onDetailClick :(Long) -> Unit
 ){
     val uiState by viewModel.homeUiState.collectAsStateWithLifecycle()
 
-    HomeScreenContent(uiState = uiState ,
+
+    LaunchedEffect(uiState.navigateToAuth) {
+        if(uiState.navigateToAuth){
+            onLogout()
+        }
+    }
+
+    HomeScreenContent(
+        uiState = uiState ,
         onQueryChange = viewModel::onQueryChange ,
         onSelectDestination = viewModel::onSelectDestination ,
-        onSearch = viewModel::onSearch)
+        onSearch = viewModel::onSearch ,
+        onLogout = viewModel::onLogoutClick,
+        onDetailClick = onDetailClick
+    )
+
 }
 
 
@@ -41,16 +60,20 @@ fun HomeScreen(
 fun HomeScreenContent(uiState: HomeUiState ,
                       onQueryChange: (String) -> Unit,
                       onSelectDestination:(Destination) -> Unit ,
-                      onSearch:()-> Unit){
+                      onSearch:()-> Unit ,
+                      onLogout: () -> Unit ,
+                      onDetailClick: (Long) -> Unit
+                      ){
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .navigationBarsPadding()
             .statusBarsPadding()
     ){
         HomeTopBar(
-            onLogoutClick =  {} ,
+            onLogoutClick =  onLogout ,
             onLocationClick = {} ,
         )
         Spacer(
@@ -76,9 +99,21 @@ fun HomeScreenContent(uiState: HomeUiState ,
             contentPadding = PaddingValues(Dimens.ExtraSmallPadding) ,
             verticalArrangement = Arrangement.spacedBy(Dimens.SpacerSmall)
         ){
+
+            if(uiState.hotelList.isEmpty()){
+                item{
+                    Text(
+                        text = "no such destination found" ,
+                        modifier = Modifier.fillMaxWidth()  ,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
             items(uiState.hotelList){ hotel->
                 HotelCard(
-                    hotel = hotel
+                    hotel = hotel ,
+                    onDetailClick = onDetailClick
                 )
             }
         }
@@ -92,7 +127,9 @@ fun HomeScreenPreview(){
     HomeScreenContent(uiState = HomeUiState() ,
         onQueryChange = {} ,
         onSelectDestination = {} ,
-        onSearch = {})
+        onSearch = {} ,
+        onLogout = {} ,
+        onDetailClick = {})
 }
 
 
