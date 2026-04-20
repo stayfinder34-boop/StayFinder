@@ -11,6 +11,9 @@ import uk.ac.tees.mad.stayfinder.data.repository.AuthRepository
 import uk.ac.tees.mad.stayfinder.data.repository.AuthRepositoryImpl
 import uk.ac.tees.mad.stayfinder.data.repository.HotelRepository
 import uk.ac.tees.mad.stayfinder.data.repository.HotelRepositoryImpl
+import uk.ac.tees.mad.stayfinder.location.LocationProvider
+import uk.ac.tees.mad.stayfinder.location.LocationProviderImpl
+import uk.ac.tees.mad.stayfinder.notification.ReminderScheduler
 
 class Container(context : Context) {
     val firebaseAuth : FirebaseAuth by lazy{
@@ -42,15 +45,28 @@ class Container(context : Context) {
             .build()
     }
 
+    val reminderScheduler by lazy {
+        ReminderScheduler(context)
+    }
+
+
     val hotelRepository : HotelRepository by lazy {
         HotelRepositoryImpl(
             apiService = apiService,
-            dao = database.hotelDao()
+            dao = database.hotelDao() ,
+            reminderScheduler = reminderScheduler
         )
     }
 
     val preferency by lazy {
         PreferenceManager(context)
+    }
+
+    val locationProvider : LocationProvider by lazy {
+        LocationProviderImpl(context)
+    }
+    val dateProvider : DateProvider by lazy {
+        DateProvider()
     }
 }
 

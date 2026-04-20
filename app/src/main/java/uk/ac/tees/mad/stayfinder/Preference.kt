@@ -19,4 +19,5 @@ class PreferenceManager(context: Context) {
     fun isLoggedIn(): Boolean {
         return sharedPref.getBoolean(KEY_IS_LOGGED_IN, false)
     }
+
 }

@@ -1,7 +1,13 @@
 package uk.ac.tees.mad.stayfinder.ui.screens.home
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -13,14 +19,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import uk.ac.tees.mad.stayfinder.data.model.Destination
@@ -44,92 +54,205 @@ fun HomeScreen(
         }
     }
 
+    val context = LocalContext.current
+
+    val locationLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        viewModel.onLocationPermissionResult(granted)
+    }
+
+    val notificationLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted->
+        if(granted){
+            viewModel.scheduleReminder()
+        }
+    }
+
+    LaunchedEffect(uiState.shouldRequestLocation) {
+
+        if (uiState.shouldRequestLocation) {
+
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                viewModel.onLocationPermissionResult(true)
+            } else {
+                locationLauncher.launch(
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+            }
+        }
+    }
+
+
+    LaunchedEffect(uiState.shouldRequestNotification) {
+
+        if (uiState.shouldRequestNotification) {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    viewModel.scheduleReminder()
+                } else {
+                    notificationLauncher.launch(
+                        Manifest.permission.POST_NOTIFICATIONS
+                    )
+                }
+            } else {
+                viewModel.scheduleReminder()
+            }
+            viewModel.resetNotificationFlag()
+        }
+    }
+
+
     HomeScreenContent(
         uiState = uiState ,
         onQueryChange = viewModel::onQueryChange ,
         onSelectDestination = viewModel::onSelectDestination ,
         onSearch = viewModel::onSearch ,
         onLogout = viewModel::onLogoutClick,
-        onDetailClick = onDetailClick
+        onActiveChange = viewModel::onActiveChange ,
+        onDetailClick = onDetailClick ,
+        onLocationClick = {expanded ->
+            viewModel.onLocationCLick(expanded)
+            if (expanded) {
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    viewModel.onLocationPermissionResult(
+                        granted = true,
+                        isLocationClick = true
+                    )
+                } else {
+                    locationLauncher.launch(
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    )
+                }
+            }
+        }
     )
 
 }
 
 
 @Composable
-fun HomeScreenContent(uiState: HomeUiState ,
-                      onQueryChange: (String) -> Unit,
-                      onSelectDestination:(Destination) -> Unit ,
-                      onSearch:()-> Unit ,
-                      onLogout: () -> Unit ,
-                      onDetailClick: (Long) -> Unit
-                      ){
+fun HomeScreenContent(
+    uiState: HomeUiState,
+    onQueryChange: (String) -> Unit,
+    onSelectDestination: (Destination) -> Unit,
+    onSearch: () -> Unit,
+    onLogout: () -> Unit,
+    onDetailClick: (Long) -> Unit,
+    onActiveChange: (Boolean) -> Unit ,
+    onLocationClick: (Boolean) -> Unit
+) {
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .navigationBarsPadding()
-            .statusBarsPadding()
-    ){
-        HomeTopBar(
-            onLogoutClick =  onLogout ,
-            onLocationClick = {} ,
-        )
-        Spacer(
-            modifier = Modifier.height(Dimens
-                .ExtraSmallPadding)
-        )
-        SearchBar(
-            query = uiState.query,
-            onQueryChange = onQueryChange,
-            onSearch = onSearch,
-            onDestClick = onSelectDestination,
-            destinations = uiState.destinationList,
-        )
-        Spacer(
-            modifier = Modifier.height(Dimens
-                .ExtraSmallPadding)
-        )
-
-        LazyColumn (
+    ) {
+        Column(
             modifier = Modifier
-                .padding(horizontal = Dimens.ScreenPadding)
-                .fillMaxWidth() ,
-            contentPadding = PaddingValues(Dimens.ExtraSmallPadding) ,
-            verticalArrangement = Arrangement.spacedBy(Dimens.SpacerSmall)
-        ){
+                .fillMaxSize()
+                .navigationBarsPadding()
+                .statusBarsPadding()
+        ) {
+            HomeTopBar(
+                onLogoutClick = onLogout,
+                onLocationClick = onLocationClick,
+                currentLocation = uiState.currentLocation,
+                isExpanded = uiState.isLocationCardExtended,
+            )
+            Spacer(
+                modifier = Modifier.height(
+                    Dimens
+                        .ExtraSmallPadding
+                )
+            )
+            SearchBar(
+                query = uiState.query,
+                isActive = uiState.isSearchBarActive ,
+                onActiveChange = onActiveChange,
+                onQueryChange = onQueryChange,
+                onSearch = onSearch,
+                onDestClick = onSelectDestination,
+                destinations = uiState.destinationList,
+                isLoading = uiState.isSearchLoading
+            )
+            Spacer(
+                modifier = Modifier.height(
+                    Dimens
+                        .ExtraSmallPadding
+                )
+            )
 
-            if(uiState.hotelList.isEmpty()){
-                item{
-                    Text(
-                        text = "no such destination found" ,
-                        modifier = Modifier.fillMaxWidth()  ,
-                        textAlign = TextAlign.Center
+
+            LazyColumn(
+                modifier = Modifier
+                    .padding(horizontal = Dimens.ScreenPadding)
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(Dimens.ExtraSmallPadding),
+                verticalArrangement = Arrangement.spacedBy(Dimens.SpacerSmall)
+            ) {
+
+                if (uiState.hotelList.isEmpty()) {
+                    item {
+                        Text(
+                            text = "No hotels found",
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                items(uiState.hotelList) { hotel ->
+                    HotelCard(
+                        hotel = hotel,
+                        onDetailClick = onDetailClick
                     )
                 }
             }
+        }
 
-            items(uiState.hotelList){ hotel->
-                HotelCard(
-                    hotel = hotel ,
-                    onDetailClick = onDetailClick
+        if(uiState.isLoading){
+            Box(
+                modifier = Modifier.fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ){
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
     }
 }
 
-
 @Composable
 @Preview(showBackground = true)
 fun HomeScreenPreview(){
-    HomeScreenContent(uiState = HomeUiState() ,
-        onQueryChange = {} ,
-        onSelectDestination = {} ,
-        onSearch = {} ,
-        onLogout = {} ,
-        onDetailClick = {})
+    HomeScreenContent(
+        uiState = HomeUiState(),
+        onQueryChange = {},
+        onSelectDestination = {},
+        onSearch = {},
+        onLogout = {},
+        onDetailClick = {},
+        onActiveChange = {} ,
+        onLocationClick = {}
+    )
 }
 
 

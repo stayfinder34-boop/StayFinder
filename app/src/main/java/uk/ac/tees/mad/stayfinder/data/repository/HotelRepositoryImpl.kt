@@ -9,11 +9,13 @@ import uk.ac.tees.mad.stayfinder.data.local.HotelEntity
 import uk.ac.tees.mad.stayfinder.data.model.Destination
 import uk.ac.tees.mad.stayfinder.data.model.Hotel
 import uk.ac.tees.mad.stayfinder.data.remote.HotelApiService
+import uk.ac.tees.mad.stayfinder.notification.ReminderScheduler
 import uk.ac.tees.mad.stayfinder.utils.toDomain
 import uk.ac.tees.mad.stayfinder.utils.toHotelEntity
 
 class HotelRepositoryImpl(private val apiService: HotelApiService ,
-    private val dao: HotelDao)
+    private val dao: HotelDao ,
+    private val reminderScheduler: ReminderScheduler)
     : HotelRepository {
 
    override suspend fun searchHotelList(
@@ -23,7 +25,6 @@ class HotelRepositoryImpl(private val apiService: HotelApiService ,
    ): Result<Unit> {
 
        return try{
-
            val response = apiService
                .searchHotelsByCity(destId = destinationId ,
                    arrivalDate = arrivalDate ,
@@ -55,8 +56,8 @@ class HotelRepositoryImpl(private val apiService: HotelApiService ,
         query: String
     ): Result<List<Destination>> {
         return try {
-
             val response = apiService.searchDestination(query)
+
 
             if (response.status != true || response.data == null) {
                 return Result.failure(
@@ -85,8 +86,12 @@ class HotelRepositoryImpl(private val apiService: HotelApiService ,
 
     override fun getHotelById(id : Long): Flow<Hotel> {
         val response = dao.getHotelById(id)
-        Log.d("TAG", "getHotelById: $response")
         return  response.map { it?.toDomain() ?: throw Exception("Hotel not found") }
+    }
+
+    override fun scheduleReminder(destination: String) {
+        Log.d("reminder" , "schedule reminder called")
+       reminderScheduler.scheduleReminder(destination)
     }
 }
 

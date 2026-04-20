@@ -27,6 +27,8 @@ class MainActivity : ComponentActivity() {
             splashViewModel.splashUiState.value is SplashUiState.Loading
         }
 
+
+
         enableEdgeToEdge()
         setContent {
 

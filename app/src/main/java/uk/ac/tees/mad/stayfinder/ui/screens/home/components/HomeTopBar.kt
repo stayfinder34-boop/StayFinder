@@ -1,19 +1,24 @@
 package uk.ac.tees.mad.stayfinder.ui.screens.home.components
 
-import android.widget.Space
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,41 +34,68 @@ import uk.ac.tees.mad.stayfinder.ui.theme.Dimens
  * I am having a custom top bar since i want full control over user interface so for that
  * reason i am using custom top bar otherwise could use the scaffold which hase inbuilt
  * top bar .
- */
-
+ **/
 
 
 @Composable
 fun HomeTopBar(
-    onLogoutClick:()-> Unit ,
-    onLocationClick:()-> Unit ,
-    modifier : Modifier = Modifier
-){
+    currentLocation: String,
+    isExpanded: Boolean,
+    onLogoutClick: () -> Unit,
+    onLocationClick: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(Dimens.TopBarHeight) ,
+            .height(Dimens.TopBarHeight),
         verticalAlignment = Alignment.CenterVertically
-    ){
+    ) {
         Text(
-            text = "StayFinder" ,
-            style = MaterialTheme.typography.headlineMedium ,
+            text = "StayFinder",
+            style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier
                 .padding(start = Dimens.SpacerSmall)
                 .weight(1f)
         )
-
-        IconButton(
-            onClick = onLocationClick ,
-            colors = IconButtonDefaults
-                .iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+        Box {
+            IconButton(
+                onClick = {
+                    onLocationClick(!isExpanded)
+                },
+                colors = IconButtonDefaults
+                    .iconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = "location",
                 )
-        ){
-            Icon(
-                imageVector = Icons.Default.LocationOn ,
-                contentDescription = "location" ,
-            )
+            }
+
+            DropdownMenu(
+                expanded = isExpanded,
+                onDismissRequest = { onLocationClick(false) },
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(horizontal = Dimens.SmallPadding),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = currentLocation
+                        )
+                    },
+                    onClick = {},
+                    colors = MenuDefaults
+                        .itemColors(
+                            textColor = MaterialTheme.colorScheme.onBackground
+                        ),
+                )
+            }
         }
         Spacer(modifier = Modifier.width(Dimens.SpacerSmall))
         IconButton(

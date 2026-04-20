@@ -2,17 +2,29 @@ package uk.ac.tees.mad.stayfinder.location
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.location.Geocoder
+import android.os.Build
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.Locale
 import kotlin.coroutines.resume
 
-class LocationProviderImpl(private val context: Context)
-    : LocationProvider {
-        private val fusedLocationClient =
-            LocationServices.getFusedLocationProviderClient(context)
+class LocationProviderImpl(
+    private val context: Context
+) : LocationProvider {
+    private val fusedLocationClient =
+        LocationServices.getFusedLocationProviderClient(context)
 
     @SuppressLint("MissingPermission")
-    override suspend fun getLocation(): Pair<Double, Double>? {
+    override suspend fun getLocation(): String? {
+
+        val latLng = getLatLng() ?: return null
+
+        return reverseGeocode(latLng.first, latLng.second)
+    }
+
+    @SuppressLint("MissingPermission")
+    private suspend fun getLatLng(): Pair<Double, Double>? {
 
         return suspendCancellableCoroutine { continuation ->
 
@@ -31,7 +43,10 @@ class LocationProviderImpl(private val context: Context)
 
                             if (currentLocation != null) {
                                 continuation.resume(
-                                    Pair(currentLocation.latitude, currentLocation.longitude)
+                                    Pair(
+                                        currentLocation.latitude,
+                                        currentLocation.longitude
+                                    )
                                 )
                             } else {
                                 continuation.resume(null)
@@ -46,14 +61,36 @@ class LocationProviderImpl(private val context: Context)
                 }
         }
     }
-}
 
-/**
- * this class is location provider class it will provide the current location of device
- * Using Google’s Fused Location API
- * fused location provider --Google’s smart location engine
- * Combines GPS + WiFi + Mobile network
- * it is most accurate and battery efficient
- * it will provide pair<latitude , longitude>
- * this will give the last cached location if not available then fetch the latest
- **/
+    private suspend fun reverseGeocode(
+        latitude: Double,
+        longitude: Double
+    ): String? {
+
+        val geocoder = Geocoder(context, Locale.getDefault())
+
+        return suspendCancellableCoroutine { continuation ->
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
+                geocoder.getFromLocation(
+                    latitude,
+                    longitude,
+                    1
+                ) { addresses ->
+
+                    val city = addresses.firstOrNull()?.locality
+                    continuation.resume(city)
+                }
+
+            } else {
+
+                val addresses =
+                    geocoder.getFromLocation(latitude, longitude, 1)
+
+                val city = addresses?.firstOrNull()?.locality
+                continuation.resume(city)
+            }
+        }
+    }
+}
