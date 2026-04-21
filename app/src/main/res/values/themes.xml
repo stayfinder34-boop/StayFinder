@@ -2,4 +2,11 @@
 <resources>
 
     <style name="Theme.StayFinder" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.MySplashScreen" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#F5EFE6FF</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo</item>
+        <item name="postSplashScreenTheme">@style/Theme.MySplashScreen</item>
+    </style>
+
 </resources>
