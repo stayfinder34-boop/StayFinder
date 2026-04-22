@@ -61,7 +61,7 @@ class SearchReminderWorker(
         )
 
         val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.baseline_notifications_24)
             .setContentTitle("Still planning your trip?")
             .setContentText("Check latest hotel deals in $destination")
             .setContentIntent(pendingIntent)
